@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QRIS Dinamis</title>
+  <title>QRIS Pembayaran</title>
 
   <style>
     body {
@@ -20,21 +20,6 @@
       text-shadow: 0 1px 3px rgba(0,0,0,.6);
     }
 
-    button {
-      padding: 14px 18px;
-      font-size: 15px;
-      border: none;
-      border-radius: 8px;
-      background: #2563eb;
-      color: #fff;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    button:hover {
-      background: #1e40af;
-    }
-
     .banner {
       margin: 20px auto;
       width: 70%;
@@ -45,94 +30,89 @@
       border-radius: 10px;
     }
 
+    button {
+      padding: 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .nominal-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    /* MODAL QRIS */
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.55);
-      justify-content: center;
+      background: rgba(0,0,0,.6);
       align-items: center;
-      z-index: 10;
+      justify-content: center;
+      z-index: 20;
     }
 
     .modal-box {
       background: #fff;
       width: 90%;
-      max-width: 420px;
-      border-radius: 12px;
+      max-width: 340px;
+      border-radius: 14px;
       padding: 20px;
-      max-height: 85vh;
-      overflow-y: auto;
-      text-align: left;
-    }
-
-    .nominal-scroll {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin: 15px 0;
-    }
-
-    .qris-box {
-      display: none;
       text-align: center;
-      margin-top: 20px;
+      animation: pop .25s ease;
     }
 
-    .qris-box img {
-      max-width: 260px;
-      width: 100%;
-      background: #fff;
-      padding: 10px;
+    @keyframes pop {
+      from { transform: scale(.95); opacity: 0 }
+      to   { transform: scale(1); opacity: 1 }
+    }
+
+    .modal-box img {
+      width: 240px;
+      max-width: 100%;
       border-radius: 10px;
-    }
-
-    .snk {
-      font-size: 12px;
-      color: #555;
-      margin-top: 10px;
+      background: #fff;
+      padding: 8px;
+      margin: 10px auto;
     }
 
     .wa-btn {
-      margin-top: 15px;
       background: #22c55e;
+      margin-top: 12px;
+    }
+
+    .close-btn {
+      margin-top: 8px;
+      background: #6b7280;
     }
   </style>
 </head>
 <body>
 
   <h2>Pembayaran QRIS</h2>
-  <p>Pilih atau masukkan nominal pembayaran</p>
+  <p>Pilih nominal pembayaran</p>
 
-  <button onclick="openModal()">Pilih Nominal</button>
+  <div class="nominal-grid" id="nominalList"></div>
 
-  <div class="banner">
-    <img src="https://hisoka.net/file/IMG-20260122-WA0029.jpg">
-  </div>
-
-  <div class="modal" id="modal">
+  <!-- MODAL QRIS -->
+  <div class="modal" id="qrisModal">
     <div class="modal-box">
-      <h3 style="text-align:center">Pilih Nominal</h3>
+      <h3 id="nominalText"></h3>
+      <img id="qrisImg">
 
-      <div class="nominal-scroll" id="nominalList"></div>
-
-      <input type="number" id="manualInput" placeholder="Nominal manual (kelipatan 1.000)">
-      <button style="margin-top:10px" onclick="manualSubmit()">Tampilkan QRIS</button>
-
-      <div class="qris-box" id="qrisBox">
-        <h4 id="nominalText"></h4>
-        <img id="qrisImg">
-
-        <div class="snk">
-          Silakan lakukan pembayaran sesuai nominal di atas.
-          <br>
-          Setelah pembayaran, klik tombol konfirmasi via WhatsApp.
-        </div>
-
-        <button class="wa-btn" onclick="confirmWA()">
-          Konfirmasi Pembayaran
-        </button>
-      </div>
+      <button class="wa-btn" onclick="confirmWA()">
+        Konfirmasi Pembayaran
+      </button>
+      <button class="close-btn" onclick="closeModal()">
+        Tutup
+      </button>
     </div>
   </div>
 
@@ -143,43 +123,32 @@
 
   let selectedNominal = ""
 
-  const modal = document.getElementById('modal')
-  const list = document.getElementById('nominalList')
-  const img = document.getElementById('qrisImg')
-  const text = document.getElementById('nominalText')
-  const box = document.getElementById('qrisBox')
+  const modal = document.getElementById("qrisModal")
+  const img = document.getElementById("qrisImg")
+  const text = document.getElementById("nominalText")
+  const list = document.getElementById("nominalList")
 
   function formatID(n) {
     return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
   }
 
-  function openModal() {
-    modal.style.display = 'flex'
-  }
-
-  function showQRIS(nominal) {
-    if (nominal < 1000 || nominal > 100000 || nominal % 1000 !== 0) {
-      alert('Nominal harus kelipatan 1.000 (1k–100k)')
-      return
-    }
-
+  function openQRIS(nominal) {
     selectedNominal = formatID(nominal)
     img.src = baseURL + selectedNominal + suffix
-    text.innerText = 'QRIS Rp ' + selectedNominal
-    box.style.display = 'block'
+    text.innerText = "QRIS Rp " + selectedNominal
+    modal.style.display = "flex"
   }
 
-  function manualSubmit() {
-    const val = Number(document.getElementById('manualInput').value)
-    showQRIS(val)
+  function closeModal() {
+    modal.style.display = "none"
   }
 
   function confirmWA() {
-    const time = new Date().toLocaleString('id-ID')
+    const time = new Date().toLocaleString("id-ID")
     const message =
 `Halo admin, saya ingin konfirmasi pembayaran.
 
-Nominal: Rp ${selectedNominal}
+Nominal: *Rp ${selectedNominal}+Fee*
 Waktu: ${time}
 
 Bukti pembayaran: (screenshot terlampir)`
@@ -188,10 +157,11 @@ Bukti pembayaran: (screenshot terlampir)`
     window.open(url, "_blank")
   }
 
+  // Generate nominal 1k–100k
   for (let i = 1000; i <= 100000; i += 1000) {
-    const btn = document.createElement('button')
+    const btn = document.createElement("button")
     btn.innerText = formatID(i)
-    btn.onclick = () => showQRIS(i)
+    btn.onclick = () => openQRIS(i)
     list.appendChild(btn)
   }
 </script>
