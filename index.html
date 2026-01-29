@@ -106,7 +106,11 @@
     <div class="modal-box">
       <h3 id="nominalText"></h3>
       <img id="qrisImg">
-
+<div class="snk">
+          Silakan scan QRIS sesuai nominal.
+          <br>
+          Setelah berhasil, klik konfirmasi via WhatsApp.
+        </div>
       <button class="wa-btn" onclick="confirmWA()">
         Konfirmasi Pembayaran
       </button>
@@ -146,7 +150,7 @@
   function confirmWA() {
     const time = new Date().toLocaleString("id-ID")
     const message =
-`Halo admin, saya ingin konfirmasi pembayaran.
+`Halo kakak, saya ingin konfirmasi pembayaran.
 
 Nominal: *Rp ${selectedNominal}+Fee*
 Waktu: ${time}
