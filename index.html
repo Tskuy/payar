@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QRIS Dinamis</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      background: url("https://raw.githubusercontent.com/Tskuy/Save/refs/heads/main/.github/workflows/bgroundskuy.png") no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    h2, p {
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,.6);
+    }
+
+    button {
+      padding: 14px 18px;
+      font-size: 15px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #1e40af;
+    }
+
+    .banner {
+      margin: 20px auto;
+      width: 70%;
+    }
+
+    .banner img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .modal-box {
+      background: #fff;
+      width: 90%;
+      max-width: 420px;
+      border-radius: 12px;
+      padding: 20px;
+      max-height: 85vh;
+      overflow-y: auto;
+      text-align: left;
+    }
+
+    .nominal-scroll {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .qris-box {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .qris-box img {
+      max-width: 260px;
+      width: 100%;
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .snk {
+      font-size: 12px;
+      color: #555;
+      margin-top: 10px;
+    }
+
+    .wa-btn {
+      margin-top: 15px;
+      background: #22c55e;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Pembayaran QRIS</h2>
+  <p>Pilih atau masukkan nominal pembayaran</p>
+
+  <button onclick="openModal()">Pilih Nominal</button>
+
+  <div class="banner">
+    <img src="https://hisoka.net/file/IMG-20260122-WA0029.jpg">
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-box">
+      <h3 style="text-align:center">Pilih Nominal</h3>
+
+      <div class="nominal-scroll" id="nominalList"></div>
+
+      <input type="number" id="manualInput" placeholder="Nominal manual (kelipatan 1.000)">
+      <button style="margin-top:10px" onclick="manualSubmit()">Tampilkan QRIS</button>
+
+      <div class="qris-box" id="qrisBox">
+        <h4 id="nominalText"></h4>
+        <img id="qrisImg">
+
+        <div class="snk">
+          Silakan lakukan pembayaran sesuai nominal di atas.
+          <br>
+          Setelah pembayaran, klik tombol konfirmasi via WhatsApp.
+        </div>
+
+        <button class="wa-btn" onclick="confirmWA()">
+          Konfirmasi Pembayaran
+        </button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const baseURL = "https://raw.githubusercontent.com/Tskuy/Save/refs/heads/main/.github/Qris "
+  const suffix = " rupiah.png"
+  const waNumber = "6283847540571"
+
+  let selectedNominal = ""
+
+  const modal = document.getElementById('modal')
+  const list = document.getElementById('nominalList')
+  const img = document.getElementById('qrisImg')
+  const text = document.getElementById('nominalText')
+  const box = document.getElementById('qrisBox')
+
+  function formatID(n) {
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+  }
+
+  function openModal() {
+    modal.style.display = 'flex'
+  }
+
+  function showQRIS(nominal) {
+    if (nominal < 1000 || nominal > 100000 || nominal % 1000 !== 0) {
+      alert('Nominal harus kelipatan 1.000 (1k–100k)')
+      return
+    }
+
+    selectedNominal = formatID(nominal)
+    img.src = baseURL + selectedNominal + suffix
+    text.innerText = 'QRIS Rp ' + selectedNominal
+    box.style.display = 'block'
+  }
+
+  function manualSubmit() {
+    const val = Number(document.getElementById('manualInput').value)
+    showQRIS(val)
+  }
+
+  function confirmWA() {
+    const time = new Date().toLocaleString('id-ID')
+    const message =
+`Halo admin, saya ingin konfirmasi pembayaran.
+
+Nominal: Rp ${selectedNominal}
+Waktu: ${time}
+
+Bukti pembayaran: (screenshot terlampir)`
+
+    const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`
+    window.open(url, "_blank")
+  }
+
+  for (let i = 1000; i <= 100000; i += 1000) {
+    const btn = document.createElement('button')
+    btn.innerText = formatID(i)
+    btn.onclick = () => showQRIS(i)
+    list.appendChild(btn)
+  }
+</script>
+
+</body>
+</html>
